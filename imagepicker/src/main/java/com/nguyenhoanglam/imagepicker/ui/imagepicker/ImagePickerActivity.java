@@ -279,16 +279,20 @@ public class ImagePickerActivity extends AppCompatActivity implements ImagePicke
         if (requestCode == Config.RC_CAPTURE_IMAGE && resultCode == RESULT_OK) {
             presenter.finishCaptureImage(this, data, config);
         }
-        CropImage.ActivityResult result = CropImage.getActivityResult(data);
-        if (resultCode == RESULT_OK) {
-            Uri resultUri = result.getUri();
-            Intent datas = new Intent();
-            data.putExtra("IMAGE_PATH", resultUri.getPath());
-            setResult(RESULT_OK, datas);
-            finish();
-        } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
-            Exception error = result.getError();
+        else if (requestCode == CropImage.CROP_IMAGE_ACTIVITY_REQUEST_CODE) {
+            overridePendingTransition(0,0);
+            CropImage.ActivityResult result = CropImage.getActivityResult(data);
+            if (resultCode == RESULT_OK) {
+                Uri resultUri = result.getUri();
+                Intent datas = new Intent();
+                data.putExtra("IMAGE_PATH", resultUri.getPath());
+                setResult(RESULT_OK, datas);
+                finish();
+            } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+                Exception error = result.getError();
+            }
         }
+
     }
 
 
