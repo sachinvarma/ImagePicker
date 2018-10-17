@@ -4,14 +4,17 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.database.ContentObserver;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Parcelable;
 import android.provider.MediaStore;
+
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
+
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
@@ -31,7 +34,9 @@ import com.nguyenhoanglam.imagepicker.model.Image;
 import com.nguyenhoanglam.imagepicker.widget.ImagePickerToolbar;
 import com.nguyenhoanglam.imagepicker.widget.ProgressWheel;
 import com.nguyenhoanglam.imagepicker.widget.SnackBarView;
+import com.theartofdev.edmodo.cropper.CropImage;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -274,6 +279,16 @@ public class ImagePickerActivity extends AppCompatActivity implements ImagePicke
         if (requestCode == Config.RC_CAPTURE_IMAGE && resultCode == RESULT_OK) {
             presenter.finishCaptureImage(this, data, config);
         }
+        CropImage.ActivityResult result = CropImage.getActivityResult(data);
+        if (resultCode == RESULT_OK) {
+            Uri resultUri = result.getUri();
+            Intent datas = new Intent();
+            data.putExtra("IMAGE_PATH", resultUri.getPath());
+            setResult(RESULT_OK, datas);
+            finish();
+        } else if (resultCode == CropImage.CROP_IMAGE_ACTIVITY_RESULT_ERROR_CODE) {
+            Exception error = result.getError();
+        }
     }
 
 
@@ -406,11 +421,17 @@ public class ImagePickerActivity extends AppCompatActivity implements ImagePicke
         getDataWithPermission();
     }
 
+
     @Override
     public void finishPickImages(List<Image> images) {
-        Intent data = new Intent();
-        data.putParcelableArrayListExtra(Config.EXTRA_IMAGES, (ArrayList<? extends Parcelable>) images);
-        setResult(RESULT_OK, data);
-        finish();
+
+        CropImage.activity(Uri.fromFile(new File(images.get(0).getPath())))
+                .start(this);
+
+
+//        Intent data = new Intent();
+//        data.putParcelableArrayListExtra(Config.EXTRA_IMAGES, (ArrayList<? extends Parcelable>) images);
+//        setResult(RESULT_OK, data);
+//        finish();
     }
 }
